@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ton Factory Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container { text-align: center; }
+        button {
+            padding: 12px 24px;
+            background-color: var(--tg-theme-button-color, #248bcf);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏭 Ton Factory</h1>
+        <p id="welcome-msg">Загрузка данных...</p>
+        <button id="main-btn">Собрать TON</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready(); // Сообщаем Telegram, что приложение готово
+        tg.expand(); // Разворачиваем на все окно
+
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('welcome-msg').innerText = `Рабочий: ${user.first_name}`;
+        }
+
+        // Пример взаимодействия: кнопка в приложении
+        document.getElementById('main-btn').addEventListener('click', () => {
+            tg.showAlert("Сбор ресурсов начат!");
+        });
+    </script>
+</body>
+</html>
