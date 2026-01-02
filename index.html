@@ -2,84 +2,74 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ton Factory</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mac Control Center</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            font-family: 'SF Pro Display', -apple-system, sans-serif;
-            background-color: #000000;
-            color: #ffffff;
-            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #f0f0f2);
+            color: var(--tg-theme-text-color, #000000);
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .header { text-align: center; margin-bottom: 25px; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .btn {
+            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            font-weight: 600;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
+            gap: 10px;
+            border: 1px solid rgba(0,0,0,0.05);
         }
-        .container { text-align: center; width: 100%; }
-        
-        /* Стилизованная звезда */
-        .star {
-            font-size: 120px;
-            cursor: pointer;
-            transition: transform 0.1s;
-            filter: drop-shadow(0 0 15px #0088cc);
-            margin: 20px 0;
-            display: inline-block;
-        }
-        .star:active { transform: scale(0.85); }
-
-        /* Баланс */
-        .balance-card {
-            background: #1c1c1e;
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #333;
-        }
-        .amount { font-size: 40px; font-weight: bold; color: #0088cc; }
-
-        /* Кнопки */
-        .btn-main {
-            background: linear-gradient(135deg, #0088cc, #005580);
-            color: white;
-            border: none;
-            padding: 18px 40px;
-            border-radius: 15px;
-            font-weight: bold;
-            font-size: 18px;
-            width: 80%;
-            margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);
-        }
-        .btn-upgrade {
-            background-color: #2c2c2e;
-            color: #ff9500;
-            border: 1px solid #ff9500;
-            margin-top: 15px;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-size: 14px;
-        }
+        .btn:active { transform: scale(0.98); opacity: 0.8; }
+        .icon { font-size: 24px; }
+        .danger { color: #eb4034; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="balance-card">
-            <div id="welcome">Завод активен</div>
-            <div class="amount" id="balance">0.00</div>
-            <div style="font-size: 12px; color: #888;">намайнено за сессию</div>
-        </div>
+    <div class="header">
+        <h1>💻 Mac Remote</h1>
+        <p>Управление системой</p>
+    </div>
 
-        <div class="star" id="clicker">⭐</div>
-
-        <div>
-            <button class="btn-main" id="send-data">СОХРАНИТЬ В БОТЕ</button>
+    <div class="grid">
+        <div class="btn" onclick="sendCommand('vol_up')">
+            <span class="icon">🔊</span> <span>Громкость +</span>
         </div>
-        
-        <button class="btn-upgrade" id="local-upgrade">Улучшить клик (x2)</button>
+        <div class="btn" onclick="sendCommand('vol_down')">
+            <span class="icon">🔉</span> <span>Громкость -</span>
+        </div>
+        <div class="btn" onclick="sendCommand('mute')">
+            <span class="icon">🔇</span> <span>Без звука</span>
+        </div>
+        <div class="btn" onclick="sendCommand('screenshot')">
+            <span class="icon">📸</span> <span>Скриншот</span>
+        </div>
+        <div class="btn" onclick="sendCommand('safari')">
+            <span class="icon">🌐</span> <span>Safari</span>
+        </div>
+        <div class="btn" onclick="sendCommand('music')">
+            <span class="icon">🎵</span> <span>Music</span>
+        </div>
+        <div class="btn danger" onclick="sendCommand('sleep')">
+            <span class="icon">🌙</span> <span>Режим сна</span>
+        </div>
+        <div class="btn danger" onclick="sendCommand('shutdown')">
+            <span class="icon">🛑</span> <span>Выключить</span>
+        </div>
     </div>
 
     <script>
@@ -87,40 +77,9 @@
         tg.ready();
         tg.expand();
 
-        let balance = 0;
-        let clickPower = 0.01;
-
-        const balanceDisplay = document.getElementById('balance');
-        const clicker = document.getElementById('clicker');
-
-        // Клик по звезде
-        clicker.addEventListener('click', () => {
-            balance += clickPower;
-            balanceDisplay.innerText = balance.toFixed(2);
-            tg.HapticFeedback.impactOccurred('medium'); // Вибрация при клике на macOS/iPhone
-        });
-
-        // Внутренний апгрейд (влияет на текущую сессию)
-        document.getElementById('local-upgrade').addEventListener('click', function() {
-            if (balance >= 1.0) {
-                balance -= 1.0;
-                clickPower *= 2;
-                balanceDisplay.innerText = balance.toFixed(2);
-                this.innerText = "Скорость x2 активирована!";
-                this.style.borderColor = "#4cd964";
-                this.style.color = "#4cd964";
-            } else {
-                tg.showAlert("Нужно хотя бы 1.00 TON для ускорения!");
-            }
-        });
-
-        // Отправка в бот
-        document.getElementById('send-data').addEventListener('click', () => {
-            tg.sendData(JSON.stringify({ ton: balance.toFixed(2) }));
-        });
-
-        if (tg.initDataUnsafe.user) {
-            document.getElementById('welcome').innerText = tg.initDataUnsafe.user.first_name + "'s Factory";
+        function sendCommand(action) {
+            // Отправляем команду боту
+            tg.sendData(JSON.stringify({command: action}));
         }
     </script>
 </body>
